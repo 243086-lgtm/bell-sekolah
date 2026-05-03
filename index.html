@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BellMaster — Sistem Bell Sekolah Otomatis</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       WELCOME SCREEN
+       Ditampilkan pertama kali agar browser mengizinkan autoplay audio
+  ============================================================ -->
+  <div id="welcome-screen" class="welcome-screen">
+    <div class="welcome-bg-grid"></div>
+    <div class="welcome-content">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 6C18.7 6 8 16.7 8 30c0 8.3 4.2 15.6 10.6 20L16 58h32l-2.6-8C51.8 45.6 56 38.3 56 30 56 16.7 45.3 6 32 6z" fill="currentColor" opacity="0.15"/>
+          <path d="M32 4C18.2 4 7 15.2 7 29c0 8.8 4.5 16.6 11.4 21.2L16 56h32l-2.4-5.8C52.5 45.6 57 37.8 57 29 57 15.2 45.8 4 32 4z" stroke="currentColor" stroke-width="2" fill="none"/>
+          <line x1="25" y1="60" x2="39" y2="60" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <line x1="32" y1="4" x2="32" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="32" cy="29" r="4" fill="currentColor"/>
+          <line x1="32" y1="25" x2="32" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="32" y1="33" x2="38" y2="39" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="welcome-badge">SISTEM KONTROL</div>
+      <h1 class="welcome-title">BellMaster</h1>
+      <p class="welcome-subtitle">Sistem Bell Sekolah Otomatis</p>
+      <p class="welcome-desc">
+        Klik tombol di bawah untuk mengaktifkan sistem.<br/>
+        Browser memerlukan interaksi pengguna sebelum audio dapat diputar otomatis.
+      </p>
+      <button id="btn-enter" class="btn-enter">
+        <span class="btn-enter-pulse"></span>
+        Aktifkan Sistem
+      </button>
+      <p class="welcome-version">v1.0.0 &mdash; localStorage Edition</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN DASHBOARD
+  ============================================================ -->
+  <div id="dashboard" class="dashboard hidden">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 2C9.4 2 4 7.4 4 14c0 4.1 2.1 7.8 5.3 10L8 28h16l-1.3-4C25.9 21.8 28 18.1 28 14 28 7.4 22.6 2 16 2z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <line x1="12" y1="30" x2="20" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="16" cy="13" r="2.5" fill="currentColor"/>
+            <line x1="16" y1="10.5" x2="16" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="16" y1="15.5" x2="19" y2="18.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <span class="header-title">BellMaster</span>
+          <span class="header-sub">Panel Kontrol</span>
+        </div>
+      </div>
+      <div class="header-clock-wrap">
+        <div id="live-clock" class="live-clock">00:00:00</div>
+        <div id="live-day" class="live-day">Senin, 1 Jan 2024</div>
+      </div>
+      <div class="header-right">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text" class="status-text">Aktif</span>
+      </div>
+    </header>
+
+    <!-- Konten utama -->
+    <main class="main-grid">
+
+      <!-- ---- KOLOM KIRI: Jadwal ---- -->
+      <section class="panel schedule-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Jadwal Bell</h2>
+          <button class="btn-icon btn-add-open" id="btn-add-open" title="Tambah Jadwal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Filter hari -->
+        <div class="day-filter" id="day-filter">
+          <button class="day-btn active" data-day="all">Semua</button>
+          <button class="day-btn" data-day="Senin">Sen</button>
+          <button class="day-btn" data-day="Selasa">Sel</button>
+          <button class="day-btn" data-day="Rabu">Rab</button>
+          <button class="day-btn" data-day="Kamis">Kam</button>
+          <button class="day-btn" data-day="Jumat">Jum</button>
+          <button class="day-btn" data-day="Sabtu">Sab</button>
+        </div>
+
+        <!-- Daftar jadwal -->
+        <div class="schedule-list" id="schedule-list">
+          <div class="empty-state" id="empty-state">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="8" y="6" width="32" height="36" rx="3"/>
+              <line x1="16" y1="16" x2="32" y2="16"/>
+              <line x1="16" y1="24" x2="28" y2="24"/>
+              <line x1="16" y1="32" x2="22" y2="32"/>
+            </svg>
+            <p>Belum ada jadwal.<br/>Klik <strong>+</strong> untuk menambahkan.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- KOLOM KANAN: Form + Suara + Emergency ---- -->
+      <div class="right-col">
+
+        <!-- Form Tambah/Edit -->
+        <section class="panel form-panel" id="form-panel">
+          <div class="panel-header">
+            <h2 class="panel-title" id="form-title">Tambah Jadwal</h2>
+            <button class="btn-icon" id="btn-form-close" title="Tutup">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="form-body">
+            <input type="hidden" id="edit-id" />
+
+            <div class="form-row two-col">
+              <div class="form-group">
+                <label for="f-day">Hari</label>
+                <select id="f-day">
+                  <option value="Senin">Senin</option>
+                  <option value="Selasa">Selasa</option>
+                  <option value="Rabu">Rabu</option>
+                  <option value="Kamis">Kamis</option>
+                  <option value="Jumat">Jumat</option>
+                  <option value="Sabtu">Sabtu</option>
+                  <option value="Minggu">Minggu</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="f-time">Jam (HH:MM)</label>
+                <input type="time" id="f-time" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="f-name">Nama Kegiatan</label>
+              <input type="text" id="f-name" placeholder="Contoh: Masuk, Istirahat, Pulang…" maxlength="50" />
+            </div>
+
+            <div class="form-group">
+              <label for="f-sound">Pilihan Suara</label>
+              <select id="f-sound" id="f-sound">
+                <!-- Opsi default + file upload akan diisi JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Pratinjau Suara</label>
+              <button type="button" class="btn-preview" id="btn-preview-sound">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <polygon points="5,3 19,12 5,21"/>
+                </svg>
+                Putar Pratinjau
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label>Upload Suara Kustom (MP3)</label>
+              <div class="upload-area" id="upload-area">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                  <path d="M24 32V16M16 24l8-8 8 8"/>
+                  <path d="M8 36h32"/>
+                </svg>
+                <span>Klik atau seret file MP3</span>
+                <input type="file" id="f-upload" accept="audio/mp3,audio/mpeg" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" id="btn-cancel">Batal</button>
+              <button type="button" class="btn-save" id="btn-save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Simpan Jadwal
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Panel Suara Kustom -->
+        <section class="panel sound-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Suara Kustom</h2>
+          </div>
+          <div id="custom-sound-list" class="custom-sound-list">
+            <p class="no-custom">Belum ada suara kustom yang diunggah.</p>
+          </div>
+        </section>
+
+        <!-- Emergency Bell -->
+        <section class="panel emergency-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">⚠ Bell Darurat</h2>
+          </div>
+          <p class="emergency-desc">Bunyikan bell darurat secara langsung tanpa bergantung pada jadwal.</p>
+
+          <!-- Pilihan suara darurat -->
+          <div class="emergency-sound-config">
+            <div class="emergency-sound-row">
+              <div class="form-group" style="flex:1">
+                <label for="emergency-sound-select">Suara Bell Darurat</label>
+                <select id="emergency-sound-select"></select>
+              </div>
+              <button type="button" class="btn-preview btn-preview-em" id="btn-preview-emergency" title="Pratinjau suara">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><polygon points="5,3 19,12 5,21"/></svg>
+                Pratinjau
+              </button>
+            </div>
+
+            <!-- Upload MP3 khusus darurat -->
+            <div class="form-group">
+              <label>Upload MP3 Darurat (otomatis dipilih)</label>
+              <div class="upload-area upload-area-em" id="emergency-upload-area">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+                  <path d="M24 32V16M16 24l8-8 8 8"/><path d="M8 36h32"/>
+                </svg>
+                <span>Klik atau seret file MP3</span>
+                <input type="file" id="emergency-upload" accept="audio/mp3,audio/mpeg" />
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-emergency" id="btn-emergency">
+            <span class="emergency-ring-anim"></span>
+            <svg viewBox="0 0 64 64" fill="none" width="28" height="28">
+              <path d="M32 4C18.2 4 7 15.2 7 29c0 8.8 4.5 16.6 11.4 21.2L16 56h32l-2.4-5.8C52.5 45.6 57 37.8 57 29 57 15.2 45.8 4 32 4z" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity=".2"/>
+              <circle cx="32" cy="29" r="5" fill="currentColor"/>
+              <line x1="32" y1="4" x2="32" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="25" y1="60" x2="39" y2="60" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            Bunyikan Bell Darurat
+          </button>
+          <div id="emergency-log" class="emergency-log"></div>
+        </section>
+
+        <!-- Log Bell Terakhir -->
+        <section class="panel log-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Log Aktivitas</h2>
+            <button class="btn-icon" id="btn-clear-log" title="Hapus Log">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
+              </svg>
+            </button>
+          </div>
+          <div id="activity-log" class="activity-log">
+            <p class="log-empty">Belum ada aktivitas.</p>
+          </div>
+        </section>
+
+      </div><!-- /right-col -->
+    </main>
+  </div><!-- /dashboard -->
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Audio elements tersembunyi -->
+  <audio id="audio-player" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
